@@ -1,0 +1,406 @@
+/* design tokens — terminal colorschemes.
+   `theme <name>` in the homepage terminal switches them; catppuccin mocha
+   is the default. --line/--accent derive from each scheme's own colors. */
+
+:root {
+  /* catppuccin mocha (default — the author's own scheme).
+     muted is mocha's overlay2: AA-contrast on the elevated window bg. */
+  --bg: #1e1e2e;
+  --fg: #cdd6f4;
+  --muted: #9399b2;
+  --green: #a6e3a1;
+  --blue: #89b4fa;
+  --yellow: #f9e2af;
+  --red: #f38ba8;
+  --accent: var(--blue);
+  --accent-bright: #b4befe;
+
+  --line: color-mix(in oklab, var(--fg) 13%, transparent);
+
+  --font-serif: "Literata Variable", Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  --measure: 42rem;
+  --step-0: 1.0625rem; /* body 17px */
+  --step-1: 1.3rem;
+  --step-2: 1.75rem;
+  --step-3: clamp(2rem, 5.5vw, 2.9rem);
+  --step--1: 0.8125rem; /* mono meta 13px */
+  --step--2: 0.75rem;
+}
+
+:root[data-theme="gruvbox"] {
+  --bg: #1d2021;
+  --fg: #ebdbb2;
+  --muted: #928374;
+  --green: #b8bb26;
+  --blue: #83a598;
+  --yellow: #fabd2f;
+  --red: #fb4934;
+  --accent-bright: #8ec07c;
+}
+
+:root[data-theme="dracula"] {
+  --bg: #22232e;
+  --fg: #f8f8f2;
+  --muted: #6272a4;
+  --green: #50fa7b;
+  --blue: #bd93f9;
+  --yellow: #f1fa8c;
+  --red: #ff5555;
+  --accent-bright: #ff79c6;
+}
+
+:root[data-theme="nord"] {
+  --bg: #2e3440;
+  --fg: #d8dee9;
+  --muted: #7b88a1;
+  --green: #a3be8c;
+  --blue: #81a1c1;
+  --yellow: #ebcb8b;
+  --red: #bf616a;
+  --accent-bright: #88c0d0;
+}
+
+:root[data-theme="tokyo-night"] {
+  --bg: #1a1b26;
+  --fg: #c0caf5;
+  --muted: #565f89;
+  --green: #9ece6a;
+  --blue: #7aa2f7;
+  --yellow: #e0af68;
+  --red: #f7768e;
+  --accent-bright: #7dcfff;
+}
+
+:root[data-theme="one-dark"] {
+  --bg: #0e1013;
+  --fg: #d7dae0;
+  --muted: #767f8b;
+  --green: #98c379;
+  --blue: #61afef;
+  --yellow: #e5c07b;
+  --red: #e06c75;
+  --accent-bright: #8cc7f7;
+}
+
+:root[data-theme="catppuccin-latte"] {
+  --bg: #eff1f5;
+  --fg: #4c4f69;
+  --muted: #8c8fa1;
+  --green: #40a02b;
+  --blue: #1e66f5;
+  --yellow: #df8e1d;
+  --red: #d20f39;
+  --accent-bright: #04a5e5;
+}
+
+:root[data-theme="solarized-light"] {
+  --bg: #fdf6e3;
+  --fg: #586e75;
+  --muted: #93a1a1;
+  --green: #859900;
+  --blue: #268bd2;
+  --yellow: #b58900;
+  --red: #dc322f;
+  --accent-bright: #2aa198;
+}
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-serif);
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--step-0);
+  line-height: 1.65;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap {
+  width: min(var(--measure), 100% - 3rem);
+  margin-inline: auto;
+}
+
+main {
+  flex: 1;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-color: color-mix(in oklab, var(--accent) 45%, transparent);
+  text-underline-offset: 0.2em;
+  transition: color 120ms ease;
+}
+a:hover {
+  color: var(--accent-bright);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+/* mono meta — dates, labels, nav */
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.01em;
+}
+
+/* section eyebrow: `blog — 2008-2013` */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  text-transform: lowercase;
+  color: var(--muted);
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.4rem;
+}
+.eyebrow::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--line);
+  align-self: center;
+}
+
+/* the command a page pretends to be the output of: `$ cat about.md` */
+.cmd-line {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--muted);
+  margin-bottom: 0.8rem;
+  overflow-wrap: break-word;
+}
+
+/* inner-page heading: `blog`, `about`, … */
+.page-title {
+  font-size: var(--step-2);
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+/* reading-width prose block */
+.prose {
+  max-width: 58ch;
+}
+.prose p + p {
+  margin-top: 1.1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* ---- terminal window chrome — shared by the homepage and the 404 page ---- */
+
+/* ambient stage behind a window */
+body:has(.term-window) {
+  justify-content: center;
+  padding: clamp(0.75rem, 3vh, 3rem) clamp(0.75rem, 3vw, 2rem);
+  background:
+    radial-gradient(
+      90rem 40rem at 50% -10%,
+      color-mix(in oklab, var(--green) 7%, transparent),
+      transparent 60%
+    ),
+    var(--bg);
+}
+
+.term-window {
+  position: relative;
+  width: min(58rem, 100%);
+  height: min(80dvh, 42rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in oklab, var(--bg) 94%, var(--fg));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--fg) 6%, transparent) inset,
+    0 30px 90px -30px rgb(0 0 0 / 0.65),
+    0 8px 30px -12px rgb(0 0 0 / 0.5);
+  overflow: hidden;
+}
+.term-window[hidden] {
+  display: none;
+}
+@media (max-width: 40rem) {
+  .term-window {
+    height: calc(100dvh - 1.5rem);
+    border-radius: 8px;
+  }
+}
+
+/* GNOME (Adwaita) header bar: centered bold title, one circular close on the right */
+.term-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.65rem;
+  background: color-mix(in oklab, var(--fg) 4%, transparent);
+  border-bottom: 1px solid var(--line);
+  user-select: none;
+}
+.wm-spacer,
+.wm-controls {
+  width: 2rem;
+  flex-shrink: 0;
+}
+.wm-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+.wm-close {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--fg) 9%, transparent);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1;
+  text-decoration: none;
+}
+.wm-close:hover,
+.wm-close:focus-visible {
+  background: color-mix(in oklab, var(--fg) 18%, transparent);
+  outline: none;
+}
+.term-title {
+  font-family: system-ui, "Cantarell", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: color-mix(in oklab, var(--fg) 88%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.term-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.9rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--step--2);
+  user-select: none;
+}
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* text roles shared by every terminal surface */
+.user {
+  color: var(--green);
+}
+.path {
+  color: var(--blue);
+}
+.dim,
+.dim a {
+  color: var(--muted);
+}
+
+/* a window's screen area: the homepage shell, fake-vim, and the 404 page */
+.term-screen {
+  flex: 1;
+  padding: clamp(1rem, 2.5vw, 1.6rem);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.term-screen a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--muted);
+}
+.term-screen a:hover {
+  color: var(--accent-bright);
+  text-decoration-color: currentColor;
+}
+.term-screen a.dir {
+  color: var(--blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+.term-screen a.dir:hover {
+  text-decoration: underline;
+}
+/* links inside dim lines stay muted, hover included — declared after the
+   hover rule so the tie on specificity resolves this way */
+.term-screen .dim a {
+  color: var(--muted);
+}
+.term-screen b {
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+/* a prompt line: PS1 label + a bare input riding the same baseline */
+.prompt-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
+}
+.prompt-input {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  color: var(--fg);
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

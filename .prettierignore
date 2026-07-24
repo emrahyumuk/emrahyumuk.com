@@ -1,0 +1,5 @@
+dist/
+.astro/
+pnpm-lock.yaml
+# migrated 2008-2013 posts are preserved byte-for-byte as written
+src/content/archive/

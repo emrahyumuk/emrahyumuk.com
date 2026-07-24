@@ -1,0 +1,54 @@
+---
+// the archived blog: header with badge + searchable year-grouped list
+import Base from "../../layouts/Base.astro";
+import ArchiveList from "../../components/ArchiveList.astro";
+import { getPosts } from "../../lib/posts";
+
+const { archived } = await getPosts();
+const count = archived.length;
+---
+
+<Base
+  title="Archive — Emrah Yumuk"
+  description={`The archive of a Turkish tech blog: ${count} posts written between 2008 and 2013.`}
+  promptPath="~/blog/archived"
+>
+  <p class="cmd-line">$ ls -t ./archived/</p>
+  <h1 class="page-title heading">
+    blog <span class="mono badge">archived · 2008–2013</span>
+  </h1>
+  <p class="mono mount-note">
+    # mounted read-only. nothing current lives here (yet)
+  </p>
+  <p class="prose intro">
+    This is the old blog: {count} posts in Turkish about the internet of that era,
+    preserved as written. Some links died along the way.
+  </p>
+  <ArchiveList />
+</Base>
+
+<style>
+  .heading {
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-style: normal;
+    font-size: var(--step--2);
+    color: var(--yellow);
+    border: 1px solid color-mix(in oklab, var(--yellow) 45%, transparent);
+    border-radius: 3px;
+    padding: 0.15rem 0.5rem;
+  }
+  .mount-note {
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .intro {
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+  }
+</style>

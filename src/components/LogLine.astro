@@ -1,0 +1,41 @@
+---
+// one archive entry as a dated log line — the site's structural motif
+import type { CollectionEntry } from "astro:content";
+import { isoDate } from "../lib/date";
+
+interface Props {
+  post: CollectionEntry<"archive">;
+}
+
+const { post } = Astro.props;
+const d = isoDate(post.data.date);
+---
+
+<li class="log-line">
+  <time class="mono" datetime={d}>{d}</time>
+  <a href={`/blog/${post.data.permalink}/`}>{post.data.title}</a>
+</li>
+
+<style>
+  .log-line {
+    display: flex;
+    gap: 1.25rem;
+    align-items: baseline;
+    padding-block: 0.55rem;
+  }
+  .log-line + .log-line {
+    border-top: 1px solid var(--line);
+  }
+  time {
+    color: var(--muted);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  a {
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--accent) 45%, transparent);
+  }
+</style>

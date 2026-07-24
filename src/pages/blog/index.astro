@@ -1,0 +1,44 @@
+---
+// blog landing: no new posts yet — points at the 2008-2013 archive.
+// New posts will list here when they exist.
+import Base from "../../layouts/Base.astro";
+import { getPosts } from "../../lib/posts";
+
+const { archived } = await getPosts();
+const count = archived.length;
+---
+
+<Base
+  title="Blog — Emrah Yumuk"
+  description={`No new posts yet. The archive holds ${count} posts from 2008–2013.`}
+  promptPath="~/blog"
+>
+  <h1 class="page-title">blog</h1>
+  <p class="mono empty-note">
+    $ ls ./2026/<br />total 0. nothing here yet, but the prompt is warm again.
+  </p>
+  <p class="prose intro">
+    New writing will land here. Until then, the archive holds {count} posts from the
+    old Turkish blog, written between 2008 and 2013.
+  </p>
+  <p class="mono go-archive">
+    <a href="/blog/archived/">cd ./archived/ →</a>
+  </p>
+</Base>
+
+<style>
+  .empty-note {
+    color: var(--muted);
+    margin-bottom: 1.6rem;
+  }
+  .intro {
+    margin-bottom: 2rem;
+  }
+  .go-archive a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .go-archive a:hover {
+    text-decoration: underline;
+  }
+</style>

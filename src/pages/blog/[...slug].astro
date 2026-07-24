@@ -1,0 +1,144 @@
+---
+// blog posts at /blog/<permalink>/ (old root permalinks redirect here)
+// Turkish documents → Turkish chrome, lang="tr"
+import { render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { isoDate } from "../../lib/date";
+import { getPosts } from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const { all } = await getPosts();
+  return all.map((post) => ({
+    params: { slug: post.data.permalink },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = isoDate(post.data.date);
+
+// plain-text excerpt for meta description: strip tags/markdown, first ~155 chars
+const excerpt =
+  post.body
+    ?.replace(/<[^>]+>/g, " ")
+    .replace(/&#?\w+;/g, " ")
+    .replace(/[#*_`>[\]()]/g, " ")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 155) || post.data.title;
+
+// `<` is escaped so a title could never smuggle a </script> into the ld+json
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  datePublished: post.data.date.toISOString(),
+  inLanguage: "tr",
+  author: {
+    "@type": "Person",
+    name: "Emrah Yumuk",
+    url: "https://www.emrahyumuk.com/",
+  },
+  mainEntityOfPage: new URL(`/blog/${post.data.permalink}/`, Astro.site).href,
+}).replace(/</g, "\\u003c");
+---
+
+<Base
+  title={`${post.data.title} — Emrah Yumuk`}
+  description={excerpt}
+  lang="tr"
+  ogType="article"
+  ogImage={`/og/${post.data.permalink}.png`}
+  jsonLd={jsonLd}
+  promptPath="~/blog"
+>
+  <article>
+    <header class="post-header">
+      <p class="cmd-line">$ cat {post.data.permalink}.md</p>
+      <p class="mono post-meta">
+        <time datetime={d}>{d}</time>
+        {
+          post.data.categories.map((c) => (
+            <span>· {c.toLocaleLowerCase("tr")}</span>
+          ))
+        }
+      </p>
+      <h1 class="post-title">{post.data.title}</h1>
+      <p class="mono archive-note">
+        bu yazı 2008–2013 blog arşivinden. metni olduğu gibi duruyor; görselleri
+        ve dışarı veren bağlantıları o internetle birlikte kaybolduğu için
+        kaldırıldı
+      </p>
+    </header>
+    <div class="post-body">
+      <Content />
+    </div>
+    {
+      post.data.tags.length > 0 && (
+        <p class="mono post-tags">{post.data.tags.join(" · ")}</p>
+      )
+    }
+    <p class="mono back"><a href="/blog/archived/">← archive</a></p>
+  </article>
+</Base>
+
+<style>
+  .post-header {
+    margin-bottom: 2.5rem;
+  }
+  .post-meta {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+  .post-title {
+    font-size: var(--step-2);
+    margin-bottom: 1.2rem;
+  }
+  .archive-note {
+    color: var(--muted);
+    font-size: var(--step--2);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.9rem;
+  }
+  .post-body :global(p) {
+    margin-block: 1.1rem;
+  }
+  /* where a lost archive image used to sit — quiet, and never mistaken for text */
+  .post-body :global(.lost-media) {
+    display: inline-block;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    border: 1px dashed var(--line);
+    border-radius: 3px;
+    padding: 0.15rem 0.5rem;
+  }
+  .post-body :global(blockquote) {
+    border-left: 2px solid var(--line);
+    margin-inline: 0;
+    padding-left: 1.2rem;
+    color: var(--muted);
+  }
+  .post-body :global(pre) {
+    overflow-x: auto;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-size: var(--step--1);
+  }
+  .post-body :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+  .post-tags {
+    color: var(--muted);
+    margin-top: 2.5rem;
+  }
+  .back {
+    margin-top: 2rem;
+  }
+</style>

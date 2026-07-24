@@ -1,0 +1,30 @@
+---
+// SEO-preserving redirect stubs: every 2008-era root permalink
+// (/foo/) now points at its /blog/foo/ home. GitHub Pages can't 301,
+// so these are instant meta-refresh pages with a canonical to the target.
+import { getPosts } from "../lib/posts";
+
+export async function getStaticPaths() {
+  const { archived } = await getPosts();
+  return archived.map((post) => ({
+    params: { slug: post.data.permalink },
+    props: { target: `/blog/${post.data.permalink}/`, title: post.data.title },
+  }));
+}
+
+const { target, title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={new URL(target, Astro.site)} />
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <p><a href={target}>{title}</a></p>
+  </body>
+</html>

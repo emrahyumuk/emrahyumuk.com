@@ -1,0 +1,58 @@
+---
+import Base from "../layouts/Base.astro";
+import { SOCIAL, MRALABS_URL } from "../lib/profile";
+---
+
+<Base
+  title="About — Emrah Yumuk"
+  description="Software engineer building products end to end, from architecture to cloud, with a small fleet of AI coding agents."
+  promptPath="~/about"
+>
+  <p class="cmd-line">$ cat about.md</p>
+  <h1 class="page-title">about</h1>
+  <div class="prose">
+    <p>
+      Software engineer. I started tinkering with the web in 2005, the year I
+      started university, and never quite stopped building things for it.
+    </p>
+    <p>
+      These days I build products end to end: the architecture, the backend, the
+      frontend, the cloud underneath. Most of the actual typing is done by AI
+      coding agents I run in parallel; I design the system, keep the quality
+      gates up, and review everything that ships. It took fifteen-plus years of
+      building software the manual way to get here, and I suspect that's exactly
+      why it works.
+    </p>
+    <p>
+      <a href={MRALABS_URL} target="_blank" rel="noopener">mralabs</a>{" "}
+      is where all of this lives. A one-person software lab: my own products, at my
+      own pace.
+    </p>
+    <p>
+      Metal in my headphones most of the day, coding or not. Away from the
+      screen it's craft beer (I used to brew my own, and probably will again)
+      and pour-over coffee that takes longer than it should. Istanbul, Kadıköy
+      side.
+    </p>
+  </div>
+  <p class="mono contact">
+    <a href={SOCIAL.github} target="_blank" rel="noopener">github</a>
+    <span class="sep">·</span>
+    <a href={SOCIAL.linkedin} target="_blank" rel="noopener">linkedin</a>
+    <span class="sep">·</span>
+    <a href={SOCIAL.untappd} target="_blank" rel="noopener">untappd</a>
+    <span class="sep">·</span>
+    <a href={SOCIAL.rym} target="_blank" rel="noopener">rym</a>
+    {/* · email — pending a proper site address */}
+  </p>
+</Base>
+
+<style>
+  .contact {
+    margin-top: 2.2rem;
+  }
+  .sep {
+    color: var(--muted);
+    margin-inline: 0.4rem;
+  }
+</style>

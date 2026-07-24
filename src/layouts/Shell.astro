@@ -1,0 +1,121 @@
+---
+// The single <html> skeleton: meta, OG, fonts, theme pre-paint.
+// Base.astro adds site chrome on top; the terminal homepage uses it bare.
+import "@fontsource-variable/literata";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/global.css";
+import {
+  THEMES as themes,
+  LEGACY_ALIASES as legacy,
+  DEFAULT_DARK as defaultDark,
+  DEFAULT_LIGHT as defaultLight,
+} from "../lib/themes";
+
+// preloaded so the font swap lands before first paint — without these the
+// archive list shifts visibly when the webfonts arrive (CLS)
+import literataLatin from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
+import literataLatinExt from "@fontsource-variable/literata/files/literata-latin-ext-wght-normal.woff2?url";
+import monoLatin from "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url";
+import monoLatinExt from "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-ext-wght-normal.woff2?url";
+
+const preloadFonts = [literataLatin, literataLatinExt, monoLatin, monoLatinExt];
+
+interface Props {
+  title: string;
+  description: string;
+  /** html lang — archive posts are Turkish documents, everything else is English */
+  lang?: "en" | "tr";
+  ogType?: "website" | "article";
+  /** page-specific share image path; posts get a generated one under /og/ */
+  ogImage?: string;
+  /** serialized schema.org object, rendered as ld+json */
+  jsonLd?: string;
+}
+
+const {
+  title,
+  description,
+  lang = "en",
+  ogType = "website",
+  ogImage = "/og.jpg",
+  jsonLd,
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImageUrl = new URL(ogImage, Astro.site);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="upgrade-insecure-requests"
+    />
+    <title>{title}</title>
+    {
+      preloadFonts.map((href) => (
+        <link
+          rel="preload"
+          href={href}
+          as="font"
+          type="font/woff2"
+          crossorigin
+        />
+      ))
+    }
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="canonical" href={canonical} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Emrah Yumuk"
+      href="/rss.xml"
+    />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
+    {
+      jsonLd && (
+        <script is:inline type="application/ld+json" set:html={jsonLd} />
+      )
+    }
+    {
+      /* define:vars keeps this inline and render-blocking, and lets the scheme
+        list come from lib/themes instead of being restated here */
+    }
+    <script
+      is:inline
+      define:vars={{ themes, legacy, defaultDark, defaultLight }}
+    >
+      // pre-paint theme: a known stored scheme wins, else OS preference picks
+      // the default. Storage can throw under strict privacy settings — fall
+      // through to the OS preference instead of dying before the stamp.
+      let stored = null;
+      try {
+        stored = localStorage.getItem("theme");
+      } catch {
+        /* stay on the OS-preference default */
+      }
+      // hasOwn, not `legacy[stored]`: "constructor" would otherwise resolve
+      // through the prototype chain and stamp a function onto the element
+      const named =
+        stored && Object.hasOwn(legacy, stored) ? legacy[stored] : stored;
+      document.documentElement.dataset.theme = themes.includes(named)
+        ? named
+        : matchMedia("(prefers-color-scheme: light)").matches
+          ? defaultLight
+          : defaultDark;
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

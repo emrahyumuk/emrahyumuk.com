@@ -1,0 +1,121 @@
+---
+// Site chrome for inner pages: header nav, footer, content column.
+import Shell from "./Shell.astro";
+import { SOCIAL } from "../lib/profile";
+
+interface Props {
+  title: string;
+  description: string;
+  /** html lang — archive posts are Turkish documents */
+  lang?: "en" | "tr";
+  ogType?: "website" | "article";
+  ogImage?: string;
+  jsonLd?: string;
+  /** cwd shown in the header prompt, e.g. "~/blog" */
+  promptPath?: string;
+}
+
+const {
+  title,
+  description,
+  lang,
+  ogType,
+  ogImage,
+  jsonLd,
+  promptPath = "~",
+} = Astro.props;
+---
+
+<Shell {title} {description} {lang} {ogType} {ogImage} {jsonLd}>
+  <header class="wrap site-header">
+    <a class="mono brand" href="/">
+      <span class="user">emrahyumuk</span>:<span class="path">{promptPath}</span
+      >$
+    </a>
+    <nav class="mono" aria-label="site">
+      <a href="/blog/">blog</a>
+      <a href="/about/">about</a>
+      <button id="theme-toggle" aria-label="toggle theme">◐</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <slot />
+  </main>
+
+  <footer class="wrap site-footer mono">
+    <span>writing on and off since 2008</span>
+    <span class="footer-links">
+      <a href={SOCIAL.github}>github</a>
+      {/* e-mail: pending a proper site address */}
+      <a href="/rss.xml">rss</a>
+    </span>
+  </footer>
+
+  <script>
+    import { applyTheme, nextTheme } from "../lib/themes";
+    document.getElementById("theme-toggle")!.addEventListener("click", () => {
+      applyTheme(nextTheme());
+    });
+  </script>
+</Shell>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.4rem 1.5rem;
+    padding-block: 2rem 4.5rem;
+  }
+  .brand {
+    color: var(--fg);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .brand:hover .path {
+    color: var(--accent-bright);
+    text-decoration: underline;
+  }
+  nav {
+    display: flex;
+    gap: 1.4rem;
+    align-items: baseline;
+  }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  nav a:hover {
+    color: var(--accent-bright);
+  }
+  #theme-toggle {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+  #theme-toggle:hover {
+    color: var(--accent-bright);
+  }
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding-block: 4.5rem 2rem;
+    color: var(--muted);
+  }
+  .footer-links {
+    display: flex;
+    gap: 1.4rem;
+  }
+  .footer-links a {
+    color: var(--muted);
+  }
+</style>

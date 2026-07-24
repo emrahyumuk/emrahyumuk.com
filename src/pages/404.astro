@@ -1,0 +1,119 @@
+---
+// 404 in the same terminal window as the homepage: it echoes the path the
+// visitor actually asked for, then points at the places that do exist.
+// Typed commands are handed to the homepage shell (see scripts/terminal/handoff).
+import Shell from "../layouts/Shell.astro";
+import { PS1 } from "../scripts/terminal/content";
+---
+
+<Shell title="404 — Emrah Yumuk" description="Page not found.">
+  <main class="term-window">
+    <div class="term-titlebar">
+      <span class="wm-spacer" aria-hidden="true"></span>
+      <span class="term-title" aria-hidden="true">emrahyumuk@web: 404</span>
+      <span class="wm-controls">
+        <a class="wm-close" href="/" aria-label="close and go home">×</a>
+      </span>
+    </div>
+
+    <div class="screen term-screen">
+      <p>
+        <Fragment set:html={PS1} />cat <span data-missing-path>this-page</span>
+      </p>
+      <p>
+        cat: <span data-missing-path>this-page</span>: No such file or directory
+      </p>
+      <p class="dim">
+        # it may have died with the old internet. these still exist:
+      </p>
+      <p class="places">
+        <a href="/blog/" class="dir">blog/</a>
+        <a href="/about/">about.md</a>
+      </p>
+      <p class="dim">
+        # lost? try '<b>help</b>'. this prompt hands your command to the shell
+        at home
+      </p>
+      <form id="lost-form" class="prompt-line prompt-row">
+        <label for="lost-in" aria-hidden="true"
+          ><Fragment set:html={PS1} /></label
+        >
+        <input
+          id="lost-in"
+          class="prompt-input"
+          type="text"
+          aria-label="terminal command"
+          placeholder="cd ~"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+      </form>
+    </div>
+
+    <div class="term-status mono">
+      <span>~</span>
+      <span>404</span>
+    </div>
+  </main>
+</Shell>
+
+<script>
+  import { stashCommand } from "../scripts/terminal/handoff";
+
+  // show the path the visitor actually requested; textContent keeps it inert
+  const path = decodeURIComponent(location.pathname);
+  for (const el of document.querySelectorAll("[data-missing-path]")) {
+    el.textContent = path;
+  }
+
+  // whatever gets typed here runs on the homepage shell; a bare Enter is
+  // just `cd ~`
+  const input = document.getElementById("lost-in") as HTMLInputElement;
+  document.getElementById("lost-form")!.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const cmd = input.value.trim();
+    if (cmd && cmd !== "cd ~") stashCommand(cmd);
+    location.href = "/";
+  });
+
+  // Tab accepts the placeholder suggestion, shell-completion style
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Tab" && "cd ~".startsWith(input.value)) {
+      e.preventDefault();
+      input.value = "cd ~";
+    }
+  });
+
+  input.focus({ preventScroll: true });
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest("a") && !getSelection()?.toString()) {
+      input.focus({ preventScroll: true });
+    }
+  });
+</script>
+
+<style>
+  .screen {
+    overflow-y: auto;
+  }
+  .screen p {
+    overflow-wrap: break-word;
+  }
+  .dim,
+  .prompt-line {
+    margin-top: 1.2em;
+  }
+  .places a {
+    margin-right: 1.2em;
+  }
+  #lost-in {
+    flex: 1;
+    min-width: 0;
+    caret-color: var(--green);
+  }
+  #lost-in::placeholder {
+    color: var(--muted);
+  }
+</style>

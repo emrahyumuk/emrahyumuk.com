@@ -1,0 +1,15 @@
+---
+// homepage = a terminal. no header, no footer — the prompt is the interface
+import Shell from "../layouts/Shell.astro";
+import Terminal from "../components/Terminal.astro";
+import { PERSON_JSON_LD } from "../lib/profile";
+---
+
+<Shell
+  title="Emrah Yumuk"
+  description="Software engineer. Building mralabs, a one-person lab shipping its own products. Writing on and off since 2008."
+  jsonLd={PERSON_JSON_LD}
+>
+  <h1 class="sr-only">Emrah Yumuk — software engineer</h1>
+  <Terminal />
+</Shell>

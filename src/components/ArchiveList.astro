@@ -1,0 +1,109 @@
+---
+// full archive: grep-styled search box + year-grouped log lines
+import LogLine from "./LogLine.astro";
+import { isoDate } from "../lib/date";
+import { getPosts } from "../lib/posts";
+
+const { archived } = await getPosts();
+const byYear = Map.groupBy(archived, (p) => isoDate(p.data.date).slice(0, 4));
+const years = [...byYear.keys()].sort().reverse();
+---
+
+<label class="mono search-row">
+  <span class="grep-prefix" aria-hidden="true">$ grep -i</span>
+  <input
+    type="search"
+    id="archive-search"
+    aria-label="search the archive"
+    placeholder='"pattern"'
+    autocapitalize="off"
+    autocorrect="off"
+    spellcheck="false"
+  />
+</label>
+
+<div id="archive-groups">
+  {
+    years.map((year) => (
+      <section class="year-group">
+        <h2 class="eyebrow">
+          {year} — {byYear.get(year)!.length}
+        </h2>
+        <ul class="log-list">
+          {byYear.get(year)!.map((post) => (
+            <LogLine post={post} />
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+<p id="no-results" class="mono" hidden>no posts match</p>
+
+<script>
+  // linear substring scan — at ~231 rows an index would be overkill
+  const input = document.getElementById("archive-search") as HTMLInputElement;
+  const groups = [...document.querySelectorAll<HTMLElement>(".year-group")];
+  const empty = document.getElementById("no-results")!;
+  const fold = (s: string) => s.toLocaleLowerCase("tr");
+  input.addEventListener("input", () => {
+    const q = fold(input.value.trim());
+    let any = false;
+    for (const group of groups) {
+      let visible = 0;
+      for (const row of group.querySelectorAll<HTMLElement>("li")) {
+        const hit = !q || fold(row.textContent ?? "").includes(q);
+        row.hidden = !hit;
+        if (hit) visible++;
+      }
+      group.hidden = visible === 0;
+      if (visible) any = true;
+    }
+    empty.hidden = any;
+  });
+</script>
+
+<style>
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55em;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 3rem;
+    cursor: text;
+  }
+  .search-row:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 0;
+    border-color: transparent;
+  }
+  .grep-prefix {
+    color: var(--green);
+    white-space: nowrap;
+  }
+  #archive-search {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font: inherit;
+    padding: 0;
+  }
+  #archive-search::placeholder {
+    color: var(--muted);
+  }
+  .year-group + .year-group {
+    margin-top: 3rem;
+  }
+  .log-list {
+    list-style: none;
+    padding: 0;
+  }
+  #no-results {
+    color: var(--muted);
+  }
+</style>
