@@ -243,6 +243,9 @@ body:has(.term-window) {
 .term-window {
   position: relative;
   width: min(58rem, 100%);
+  /* it is a <main>, so `main { flex: 1 }` would size it by flex-basis and grow
+     it to the whole body — the height below is the point of a window */
+  flex: 0 0 auto;
   height: min(80dvh, 42rem);
   margin-inline: auto;
   display: flex;
@@ -259,9 +262,17 @@ body:has(.term-window) {
 .term-window[hidden] {
   display: none;
 }
+/* --vv is the visual viewport height, kept current while a keyboard is open.
+   The page has to collapse onto it as a whole: a body left at full height
+   would keep centring the window in space the keyboard has taken, and the
+   padding is pinned so the window's height below lands exactly on the body. */
 @media (max-width: 40rem) {
+  body:has(.term-window) {
+    min-height: var(--vv, 100dvh);
+    padding-block: 0.75rem;
+  }
   .term-window {
-    height: calc(100dvh - 1.5rem);
+    height: calc(var(--vv, 100dvh) - 1.5rem);
     border-radius: 8px;
   }
 }
@@ -380,10 +391,15 @@ body:has(.term-window) {
   font-weight: 600;
 }
 
-/* a prompt line: PS1 label + a bare input riding the same baseline */
+/* a prompt line: PS1 label + a bare input on the same line.
+   Centred rather than baseline-aligned: WebKit gives an empty input the bottom
+   of its box for a baseline and the text's own once something is typed, so a
+   baseline row visibly jumps on the first keystroke. Every item here carries
+   the same font, and half-leading is symmetric, so centring lands their text on
+   the same line whatever line-height each one keeps. */
 .prompt-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.55em;
 }
 .prompt-input {
@@ -393,6 +409,18 @@ body:has(.term-window) {
   padding: 0;
   color: var(--fg);
   font: inherit;
+  /* a tight line box keeps a native caret — the 404 prompt still uses one —
+     the height of a character rather than the height of the 1.7 line */
+  line-height: 1.2;
+}
+
+/* iOS zooms the whole page in when a focused input renders below 16px — which
+   drags the window off-screen and cannot be refused without also banning
+   pinch-zoom. So on phones the screen simply reads at 16px. */
+@media (max-width: 40rem) {
+  .term-screen {
+    font-size: 1rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

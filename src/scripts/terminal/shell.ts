@@ -97,7 +97,8 @@ export function createShell(deps: ShellDeps) {
       }
     },
     sl: onTrain,
-    neofetch: () => neofetchArt(currentTheme()).forEach((l) => print(l)),
+    // 44 columns wide: too wide for a phone at the screen's own size
+    neofetch: () => neofetchArt(currentTheme()).forEach((l) => print(l, "art")),
   };
 
   const history: string[] = [];

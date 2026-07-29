@@ -173,8 +173,15 @@ Kernel 6.16.2-300.fc44.x86_64 on an x86_64 (tty2)
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
+  /* ASCII art has to keep its columns; on a phone that means its own size */
+  @media (max-width: 40rem) {
+    .term :global(.art) {
+      font-size: 0.75rem;
+    }
+  }
   .term :global(.caret),
-  #term-form::after {
+  #term-form::after,
+  #tty-form::after {
     display: inline-block;
     width: 0.55em;
     height: 1.15em;
@@ -183,13 +190,12 @@ Kernel 6.16.2-300.fc44.x86_64 on an x86_64 (tty2)
     animation: blink 1.1s steps(1) infinite;
   }
 
-  /* the caret is drawn after the input so it can render as a block */
-  #term-form::after {
+  /* the caret is drawn after the input so it can render as a block; the row
+     centres it on the line, which is where a character's cell sits */
+  #term-form::after,
+  #tty-form::after {
     content: "";
-    margin-left: -0.4em;
-    /* the form row aligns items to the text baseline; center the block
-       cursor on the line instead so it doesn't ride high */
-    align-self: center;
+    margin-left: calc(-0.4em - 2px); /* the row's gap, less the input's slack */
   }
   #term-form:focus-within::after {
     background: var(--green);
@@ -198,26 +204,21 @@ Kernel 6.16.2-300.fc44.x86_64 on an x86_64 (tty2)
   .ps1 {
     white-space: nowrap;
   }
-  #term-in {
+  /* both inputs are sized to their content so the caret drawn after them lands
+     right past the text. --cols is the character count, kept in sync by the
+     shell; a monospace `ch` is exactly one advance, and the 2px is room for the
+     native caret we hid — at an exact fit WebKit scrolls the text leftwards to
+     keep that caret in view and clips the first character. (field-sizing would
+     size these without script, but Safari shipped it far too late to rely on.) */
+  #term-in,
+  #tty-in {
     flex: 0 1 auto;
-    width: auto;
-    field-sizing: content;
+    width: calc(var(--cols, 0) * 1ch + 2px);
     min-width: 1px;
-    caret-color: transparent; /* the block ::after caret replaces it */
+    caret-color: transparent; /* the ::after caret replaces it */
   }
   #term-in:disabled {
     opacity: 0;
-  }
-  /* without content-sizing the input keeps its default ~20ch box, which would
-     strand the block caret mid-row — hand the job back to the native caret */
-  @supports not (field-sizing: content) {
-    #term-in {
-      flex: 1 1 auto;
-      caret-color: var(--green);
-    }
-    #term-form::after {
-      display: none;
-    }
   }
   @keyframes blink {
     50% {
@@ -276,14 +277,31 @@ Kernel 6.16.2-300.fc44.x86_64 on an x86_64 (tty2)
     padding: clamp(1rem, 4vw, 3rem);
     cursor: text;
   }
+  /* same 16px floor as the emulator screen: the login prompt is an input too */
+  @media (max-width: 40rem) {
+    .tty-console {
+      font-size: 1rem;
+    }
+  }
   .tty-banner {
     font: inherit;
     margin-bottom: 0.5rem;
     white-space: pre-wrap;
   }
   #tty-in {
-    flex: 1;
-    min-width: 0;
     color: inherit; /* the console's own grey, not the theme foreground */
+  }
+  /* a real console echoes nothing at all while a password is typed, and the
+     caret stays put — which also spares us guessing how wide a bullet is */
+  #tty-in[type="password"] {
+    width: 2px;
+    color: transparent;
+  }
+  #tty-form::after {
+    /* the console keeps a plain line, like the caret it used to borrow from the
+       browser — but drawn by us, so it stays on the line on iOS too */
+    width: 2px;
+    margin-left: calc(-0.55em - 2px); /* at the end of the text, not past it */
+    background: currentColor; /* grey with the console, not the theme's fg */
   }
 </style>

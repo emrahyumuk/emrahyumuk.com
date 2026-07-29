@@ -135,6 +135,56 @@ describe("createTerminal", () => {
     expect(els.output.textContent).toBe("");
   });
 
+  // the block caret is drawn after the input, so a stale width strands it
+  it("keeps the input as wide as its content", async () => {
+    const { els, terminal } = mount();
+    await terminal.boot();
+    const cols = () => els.input.style.getPropertyValue("--cols");
+
+    els.input.value = "pwd";
+    els.input.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(cols()).toBe("3");
+
+    els.form.dispatchEvent(new Event("submit", { cancelable: true }));
+    expect(cols()).toBe("0");
+
+    press(els.input, "ArrowUp"); // history sets the value with no input event
+    expect(cols()).toBe("3");
+  });
+
+  // iOS opens its keyboard by shrinking the visual viewport and scrolling the
+  // page out from under the window, rather than by resizing anything
+  it("fits the window to the visual viewport, pinch-zoom excepted", async () => {
+    const vv = Object.assign(new EventTarget(), { height: 420, scale: 1 });
+    Object.defineProperty(window, "visualViewport", {
+      value: vv,
+      configurable: true,
+    });
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const height = () =>
+      document.documentElement.style.getPropertyValue("--vv");
+
+    const { terminal } = mount();
+    await terminal.boot();
+
+    vv.dispatchEvent(new Event("resize"));
+    expect(height()).toBe("420px");
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
+
+    // Safari finishes its own scroll after the resize, so scroll is pinned too
+    vv.height = 300;
+    vv.dispatchEvent(new Event("scroll"));
+    expect(height()).toBe("300px");
+
+    Object.assign(vv, { scale: 2, height: 100 });
+    vv.dispatchEvent(new Event("resize"));
+    expect(height()).toBe("300px");
+
+    scrollTo.mockRestore();
+    Reflect.deleteProperty(window, "visualViewport");
+    document.documentElement.style.removeProperty("--vv");
+  });
+
   it("runs data-cmd links instead of following them", async () => {
     const { els, terminal } = mount();
     await terminal.boot();

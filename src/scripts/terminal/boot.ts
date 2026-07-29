@@ -140,10 +140,17 @@ export function createTerminal(els: TerminalElements, data: TerminalData) {
   }
 
   // ---------------------------------------------------------- prompt input
+  // the input carries no box of its own — it is exactly as wide as what is
+  // typed, so the block caret drawn after it sits where the next letter goes
+  const sizeInput = () =>
+    els.input.style.setProperty("--cols", String(els.input.value.length));
+  els.input.addEventListener("input", sizeInput);
+
   els.form.addEventListener("submit", (e) => {
     e.preventDefault();
     shell.run(els.input.value);
     els.input.value = "";
+    sizeInput();
     scrollEnd();
   });
 
@@ -162,7 +169,25 @@ export function createTerminal(els: TerminalElements, data: TerminalData) {
       e.preventDefault();
       shell.commands.clear();
     }
+    sizeInput(); // history and completion set the value without an input event
   });
+
+  // iOS raises the keyboard by shrinking the visual viewport and scrolling the
+  // page, which slides the window's titlebar off the top. Fit the window to
+  // what is left of the screen instead, and take the scroll back.
+  // Safari applies that scroll asynchronously, after the resize — so the page
+  // has to be pinned on both events, not just the one that carries the height.
+  const vv = window.visualViewport;
+  if (vv) {
+    const fitToViewport = () => {
+      if (vv.scale > 1) return; // pinch-zoom shrinks it too, and must be left alone
+      document.documentElement.style.setProperty("--vv", `${vv.height}px`);
+      scrollTo(0, 0);
+      scrollEnd(); // the shorter screen would otherwise keep the prompt below it
+    };
+    vv.addEventListener("resize", fitToViewport);
+    vv.addEventListener("scroll", fitToViewport);
+  }
 
   els.themeButton.addEventListener("click", () => setTheme(nextTheme()));
   els.closeButton.addEventListener("click", dropToTty);

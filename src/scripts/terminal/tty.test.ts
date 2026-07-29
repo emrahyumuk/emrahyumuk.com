@@ -68,6 +68,19 @@ describe("createTtyConsole", () => {
     expect(c.log.textContent).toContain("web login: emrahyumuk");
   });
 
+  // the block caret is drawn after the input, so a stale width strands it
+  it("keeps the login input as wide as what is typed", () => {
+    const cols = () => c.input.style.getPropertyValue("--cols");
+    c.console.drop();
+
+    c.input.value = "emrah";
+    c.input.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(cols()).toBe("5");
+
+    submit(c.form); // moving on to the password clears it
+    expect(cols()).toBe("0");
+  });
+
   it("escapes straight back to the session", () => {
     c.console.drop();
     c.root.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));

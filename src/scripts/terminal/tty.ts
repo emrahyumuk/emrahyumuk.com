@@ -19,6 +19,12 @@ export function createTtyConsole(opts: TtyConsoleOptions) {
   const { root, window: win, log, label, input, form, onRestore } = opts;
   let stage: "login" | "password" = "login";
 
+  // like the shell prompt: the input is only as wide as what is typed, so the
+  // block caret drawn after it sits where the next character goes
+  const sizeInput = () =>
+    input.style.setProperty("--cols", String(input.value.length));
+  input.addEventListener("input", sizeInput);
+
   const drop = () => {
     win.hidden = true;
     root.hidden = false;
@@ -27,6 +33,7 @@ export function createTtyConsole(opts: TtyConsoleOptions) {
     label.textContent = "web login:";
     input.type = "text";
     input.value = "";
+    sizeInput();
     input.focus();
   };
 
@@ -47,6 +54,7 @@ export function createTtyConsole(opts: TtyConsoleOptions) {
     label.textContent = "Password:";
     input.type = "password";
     input.value = "";
+    sizeInput();
   });
 
   root.addEventListener("keydown", (e) => {
